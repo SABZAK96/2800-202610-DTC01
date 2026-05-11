@@ -284,10 +284,9 @@ app.delete("/DeleteAccount", async(req,res)=>{
 
 //get current user info
 app.get("/user", async (req, res) => {
-  console.log("USER ROUTE HIT");
-  console.log(req.session);
-
+  console.log("GET USER ROUTE HIT")
   try {
+
     if (!req.session.UserID) {
       return res.status(401).json({
         error: "No session"
@@ -319,32 +318,25 @@ app.get("/user", async (req, res) => {
 
 //update user
 app.put("/updateUser/:id", async (req, res) => {
+  console.log("UPDATE ROUTE HIT")
   try {
-
-      console.log(req.body);
-
-      const updated = await UserModel.findByIdAndUpdate(
+      const updated = await usersModel.findByIdAndUpdate(
           req.params.id,
-          {
-            $set: {
-              "tutorials.search": req.body.tutorialSearch
-            }
-          },
-          {
-            new: true,
-            runValidators: true
-          }
+          { $set: req.body },
+          {new:true, runValidators:true}
       );
 
-      res.json(updated);
+      if (!updated) {
+          return res.status(400).json({ error: "User not updated" });
+      }
 
-  } catch (err) {
-
-      console.log(err);
-
-      res.status(500).json({
-          error: err.message
+      res.json({
+          message: `Updated successfully`,
+          data: updated
       });
+  }
+  catch (err) {
+      res.status(404).json({error: err.message});
   }
 });
 
